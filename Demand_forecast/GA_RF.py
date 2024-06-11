@@ -21,7 +21,8 @@ print(data_expanded.head(10))
 print(data_expanded.columns)
 
 # 데이터 집계: 시간대별로 각 대여소의 이용 건수를 집계
-data_expanded['Rental_count'] = data_expanded.groupby(['Hour', 'Rental_Station_Number'])['Rental_Station_Number'].transform('count')
+data_expanded['Rental_count'] = data_expanded.groupby(['Hour', 'Rental_Station_Number'])[
+    'Rental_Station_Number'].transform('count')
 
 # 데이터 집계
 grouped_data = data_expanded.groupby(['Hour', 'Rental_Station_Number', 'Dew_point_temperature_C',
@@ -70,27 +71,33 @@ print(f"Test MSE (Random Forest Regression): {rf_mse_test}")
 rf_comparison_df = pd.DataFrame({'Actual': y_test.values, 'Predicted': rf_y_pred})
 print(rf_comparison_df.head(10))
 
+
 # 유전 알고리즘 목표 함수 정의 (랜덤 포레스트 회귀 모델 사용)
 def fitness_rf(X):
     hour, station_id, dew_point, humidity, rainfall, snowfall, solar_radiation, temp, visibility, wind_speed, seasons, holiday, functioning_day = X
     features_df = pd.DataFrame(
-        [[hour, station_id, dew_point, humidity, rainfall, snowfall, solar_radiation, temp, visibility, wind_speed, seasons, holiday, functioning_day]],
+        [[hour, station_id, dew_point, humidity, rainfall, snowfall, solar_radiation, temp, visibility, wind_speed,
+          seasons, holiday, functioning_day]],
         columns=features)
     prediction = rf_model.predict(features_df)
     return -prediction[0]  # 수요를 최대화하기 위해 음수 사용
+
 
 # 범주형 변수의 고유값 범위 설정
 seasons_min, seasons_max = grouped_data['Seasons'].min(), grouped_data['Seasons'].max()
 holiday_min, holiday_max = grouped_data['Holiday'].min(), grouped_data['Holiday'].max()
 functioning_day_min, functioning_day_max = grouped_data['Functioning_Day'].min(), grouped_data['Functioning_Day'].max()
 
+
 # 유전 알고리즘을 이용하여 특정 시간대에 최적의 대여소 번호를 찾는 함수
 def find_best_station_for_hour_rf(hour, dew_point, humidity, rainfall, snowfall, solar_radiation, temp, visibility,
                                   wind_speed, seasons, holiday, functioning_day):
     varbound = np.array([
         [hour, hour],  # Hour 고정
-        [grouped_data['Rental_Station_Number'].min(), grouped_data['Rental_Station_Number'].max()],  # Rental Station Number
-        [grouped_data['Dew_point_temperature_C'].min(), grouped_data['Dew_point_temperature_C'].max()],  # Dew point temperature
+        [grouped_data['Rental_Station_Number'].min(), grouped_data['Rental_Station_Number'].max()],
+        # Rental Station Number
+        [grouped_data['Dew_point_temperature_C'].min(), grouped_data['Dew_point_temperature_C'].max()],
+        # Dew point temperature
         [grouped_data['Humidity'].min(), grouped_data['Humidity'].max()],  # Humidity
         [grouped_data['Rainfall'].min(), grouped_data['Rainfall'].max()],  # Rainfall
         [grouped_data['Snowfall'].min(), grouped_data['Snowfall'].max()],  # Snowfall
@@ -120,6 +127,7 @@ def find_best_station_for_hour_rf(hour, dew_point, humidity, rainfall, snowfall,
     best_station_id = best_solution[1]
     return best_station_id
 
+
 # 시간대별 최적의 대여소 번호 찾기
 best_stations_per_hour = {}
 for hour in range(24):
@@ -146,7 +154,7 @@ plt.grid(axis='y', linestyle='--', alpha=0.7)
 # 막대 위에 수치를 표시
 for bar in bars:
     yval = bar.get_height()
-    plt.text(bar.get_x() + bar.get_width()/2.0, yval, f'{yval:.0f}', va='bottom')
+    plt.text(bar.get_x() + bar.get_width() / 2.0, yval, f'{yval:.0f}', va='bottom')
 
 plt.show()
 
