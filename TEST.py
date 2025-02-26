@@ -10,3 +10,4 @@ print(data1.head())
 # 병합된 데이터프레임의 정보(열 타입, null 값 등)를 출력합니다.
 print(data1.info())
 
+#임창우 와꾸봐라
